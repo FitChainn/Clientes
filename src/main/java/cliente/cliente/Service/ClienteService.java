@@ -20,25 +20,11 @@ public class ClienteService {
         return clienteRepository.findAll();
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public Cliente getCliente(Long id){
+        return clienteRepository.findById(id).
+                orElseThrow(()->new RuntimeException("Cliente no encontrado con el id " +id));
+    }
+    public Cliente saveCliente(Cliente cliente){
+        return clienteRepository.save(cliente);
+    }
 }

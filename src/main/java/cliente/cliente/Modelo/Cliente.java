@@ -25,4 +25,6 @@ public class Cliente {
 
     @Column(nullable = false)
     private Date fechaNacimiento;
+
+
 }
