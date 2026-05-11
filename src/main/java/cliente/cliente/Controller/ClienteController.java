@@ -2,6 +2,7 @@ package cliente.cliente.Controller;
 
 import cliente.cliente.Modelo.Cliente;
 import cliente.cliente.Service.ClienteService;
+import cliente.cliente.dto.ClienteResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +16,8 @@ public class ClienteController {
     private ClienteService clienteService;
 
     @GetMapping
-    public ResponseEntity <List<Cliente>> obtenerClientes(){
-        List<Cliente> clientes = clienteService.getClientes();
+    public ResponseEntity <List<ClienteResponseDTO>> obtenerClientes(){
+        List<ClienteResponseDTO> clientes = clienteService.obtenerClientes();
         if(clientes.isEmpty()){
             return ResponseEntity.noContent().build();
         }
@@ -24,18 +25,24 @@ public class ClienteController {
 
     }
     @GetMapping("/{id}")
-    public ResponseEntity<Cliente> obtenerCliente (@PathVariable Long id){
-        try{
-            Cliente cliente = clienteService.getCliente(id);
-            return ResponseEntity.ok(cliente);
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<ClienteResponseDTO> obtenerCliente (@PathVariable Long id){
+        return clienteService.obtenerCliente(id).
+                map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public ResponseEntity<Cliente> RegistrarCliente(@RequestBody Cliente nuevo){
         return ResponseEntity.status(201).body(clienteService.saveCliente(nuevo));
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> eliminar (@PathVariable Long id){
+        if(clienteService.obtenerCliente(id).isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        clienteService.eliminarPorId(id);
+        return ResponseEntity.noContent().build();
     }
 
 }
