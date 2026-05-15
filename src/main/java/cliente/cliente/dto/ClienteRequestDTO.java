@@ -24,4 +24,6 @@ public class ClienteRequestDTO {
     @NotNull(message = "La fecha no puede esta vacia")
     private LocalDate fechaNacimiento;
 
+    private Long Entrenador_Id;
+
 }

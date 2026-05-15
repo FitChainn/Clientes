@@ -2,6 +2,7 @@ package cliente.cliente.Controller;
 
 import cliente.cliente.Modelo.Cliente;
 import cliente.cliente.Service.ClienteService;
+import cliente.cliente.dto.ClienteRequestDTO;
 import cliente.cliente.dto.ClienteResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class ClienteController {
     }
 
     @PostMapping
-    public ResponseEntity<Cliente> RegistrarCliente(@RequestBody Cliente nuevo){
+    public ResponseEntity<ClienteResponseDTO> RegistrarCliente(@RequestBody ClienteRequestDTO nuevo){
         return ResponseEntity.status(201).body(clienteService.saveCliente(nuevo));
     }
 
