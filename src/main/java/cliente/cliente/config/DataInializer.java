@@ -28,20 +28,15 @@ public class DataInializer implements CommandLineRunner {
 
         log.info("Data inializer: Base de datos vacia, llenando datos");
 
-        clienteRepository.save(new Cliente(null, "Juan Pérez", "12345678-k", LocalDate.parse("1990-01-01")));
-        clienteRepository.save(new Cliente(null, "María García", "9876543-2", LocalDate.parse("1985-11-15")));
-        clienteRepository.save(new Cliente(null, "Carlos Soto", "15432987-1", LocalDate.parse("1992-03-20")));
-        clienteRepository.save(new Cliente(null, "Ana Morales", "11222333-4", LocalDate.parse("1988-07-05")));
-        clienteRepository.save(new Cliente(null, "Diego Rojas", "18555444-9", LocalDate.parse("2000-12-30")));
-        clienteRepository.save(new Cliente(null, "Elena Silva", "14666777-2", LocalDate.parse("1994-02-14")));
-        clienteRepository.save(new Cliente(null, "Roberto Díaz", "10111222-3", LocalDate.parse("1980-06-18")));
-        clienteRepository.save(new Cliente(null, "Patricia López", "17888999-k", LocalDate.parse("1998-09-22")));
-        clienteRepository.save(new Cliente(null, "Fernando Tapia", "13333444-1", LocalDate.parse("1982-10-10")));
-        clienteRepository.save(new Cliente(null, "Sofía Castro", "16777888-5", LocalDate.parse("1996-04-05")));
+        clienteRepository.save(new Cliente(null, "Juan Pérez", "12345678-k", LocalDate.parse("1990-01-01"),null));
+        clienteRepository.save(new Cliente(null, "María García", "9876543-2", LocalDate.parse("1985-11-15"),null));
+        clienteRepository.save(new Cliente(null, "Carlos Soto", "15432987-1", LocalDate.parse("1992-03-20"),null));
+        clienteRepository.save(new Cliente(null, "Ana Morales", "11222333-4", LocalDate.parse("1988-07-05"),null));
+        clienteRepository.save(new Cliente(null, "Diego Rojas", "18555444-9", LocalDate.parse("2000-12-30"),null));
+        clienteRepository.save(new Cliente(null, "Elena Silva", "14666777-2", LocalDate.parse("1994-02-14"),null));
+        clienteRepository.save(new Cliente(null, "Roberto Díaz", "10111222-3", LocalDate.parse("1980-06-18"),null));
+        clienteRepository.save(new Cliente(null, "Patricia López", "17888999-k", LocalDate.parse("1998-09-22"),null));
+        clienteRepository.save(new Cliente(null, "Fernando Tapia", "13333444-1", LocalDate.parse("1982-10-10"),null));
+        clienteRepository.save(new Cliente(null, "Sofía Castro", "16777888-5", LocalDate.parse("1996-04-05"),null));
     }
-
-
-
-
-
 }

@@ -17,5 +17,6 @@ public class ClienteResponseDTO {
     private String nombre;
     private String run;
     private LocalDate fechaNacimiento;
+    private Long Entrenador_Id;
 
 }

@@ -28,7 +28,8 @@ public class ClienteService {
                 cliente.getId(),
                 cliente.getNombre(),
                 cliente.getRun(),
-                cliente.getFechaNacimiento()
+                cliente.getFechaNacimiento(),
+                cliente.getEntrenadorId()
         );
     }
 
