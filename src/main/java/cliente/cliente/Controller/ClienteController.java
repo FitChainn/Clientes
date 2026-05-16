@@ -37,8 +37,8 @@ public class ClienteController {
 
     @PostMapping
     public ResponseEntity<ClienteResponseDTO> RegistrarCliente(@Valid @RequestBody ClienteRequestDTO nuevo)
-    {   ClienteResponseDTO clienteGuardado = clienteService.saveCliente(nuevo);
-        return ResponseEntity.status(201).body(clienteService.saveCliente(clienteGuardado));
+    {
+        return ResponseEntity.status(201).body(clienteService.saveCliente(nuevo));
     }
 
     @DeleteMapping("{id}")
