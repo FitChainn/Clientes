@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @JsonFormat(pattern = "dd-MM-yyyy")
 @Data
@@ -15,6 +16,6 @@ public class ClienteResponseDTO {
     private Long id;
     private String nombre;
     private String run;
-    private Date fechaNacimiento;
+    private LocalDate fechaNacimiento;
 
 }

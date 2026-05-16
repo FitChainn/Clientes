@@ -2,10 +2,13 @@ package cliente.cliente.Controller;
 
 import cliente.cliente.Modelo.Cliente;
 import cliente.cliente.Service.ClienteService;
+import cliente.cliente.dto.ClienteRequestDTO;
 import cliente.cliente.dto.ClienteResponseDTO;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -14,6 +17,7 @@ import java.util.List;
 public class ClienteController {
     @Autowired
     private ClienteService clienteService;
+
 
     @GetMapping
     public ResponseEntity <List<ClienteResponseDTO>> obtenerClientes(){
@@ -32,8 +36,9 @@ public class ClienteController {
     }
 
     @PostMapping
-    public ResponseEntity<Cliente> RegistrarCliente(@RequestBody Cliente nuevo){
-        return ResponseEntity.status(201).body(clienteService.saveCliente(nuevo));
+    public ResponseEntity<ClienteResponseDTO> RegistrarCliente(@Valid @RequestBody ClienteRequestDTO nuevo)
+    {   ClienteResponseDTO clienteGuardado = clienteService.saveCliente(nuevo);
+        return ResponseEntity.status(201).body(clienteService.saveCliente(clienteGuardado));
     }
 
     @DeleteMapping("{id}")
