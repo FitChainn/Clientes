@@ -24,7 +24,7 @@ public class DataInializer implements CommandLineRunner {
             log.info("Data inializer: La BD ya tiene datos, se omite la carga de datos");
             return;
         }
-        a
+
         log.info("Data inializer: Base de datos vacia, llenando datos");
 
         clienteRepository.save(new Cliente(null, "Juan Pérez", "12345678-k", LocalDate.of(1990, 12,15)));
