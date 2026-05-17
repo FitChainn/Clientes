@@ -6,12 +6,15 @@ import cliente.cliente.dto.ClienteRequestDTO;
 import cliente.cliente.dto.ClienteResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("v1/clientes")
 public class ClienteController {
@@ -42,12 +45,18 @@ public class ClienteController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> eliminar (@PathVariable Long id){
+    public ResponseEntity<?> eliminar (@PathVariable Long id){
         if(clienteService.obtenerCliente(id).isEmpty()){
-            return ResponseEntity.notFound().build();
+            Map<String, String> mensaje1 = new HashMap<>();
+            mensaje1.put("mensaje", "Cliente no encontrado");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mensaje1);
+
         }
         clienteService.eliminarPorId(id);
-        return ResponseEntity.noContent().build();
+        log.info("Cliente eliminado");
+        Map<String, String> mensaje = new HashMap<>();
+        mensaje.put("mensaje", "Eliminado correctamente");
+        return ResponseEntity.ok(mensaje);
     }
 
 }

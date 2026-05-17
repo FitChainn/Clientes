@@ -6,6 +6,7 @@ import cliente.cliente.Repository.ClienteRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Component;
 
 import java.sql.Date;
@@ -38,9 +39,4 @@ public class DataInializer implements CommandLineRunner {
         clienteRepository.save(new Cliente(null, "Fernando Tapia", "13333444-1", LocalDate.of(1982,10,10)));
         clienteRepository.save(new Cliente(null, "Sofía Castro", "16777888-5", LocalDate.of(1996,4,5)));
     }
-
-
-
-
-
 }

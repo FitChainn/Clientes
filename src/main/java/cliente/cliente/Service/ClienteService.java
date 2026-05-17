@@ -31,7 +31,8 @@ public class ClienteService {
                 cliente.getId(),
                 cliente.getNombre(),
                 cliente.getRun(),
-                cliente.getFechaNacimiento()
+                cliente.getFechaNacimiento(),
+                cliente.getEntrenadorId()
         );
     }
 
@@ -71,4 +72,31 @@ public class ClienteService {
         return mapToDTO(clienteRepository.save(cliente));
     }
     public void eliminarPorId (Long id){clienteRepository.deleteById(id);}
+
+    public ClienteResponseDTO saveCliente(ClienteRequestDTO dto) {
+        // Validación: Consultar al microservicio Entrenador (puerto 8082)
+        // Se asume que el endpoint /api/entrenadores/{id} existe en el otro servicio
+        Boolean existeEntrenador = webClientBuilder.build()
+                .get()
+                .uri("http://localhost:8082/api/entrenadores/{id}", dto.getEntrenador_Id())
+                .retrieve()
+                .toBodilessEntity()
+                .map(response -> response.getStatusCode().is2xxSuccessful())
+                .block();
+
+        if (Boolean.FALSE.equals(existeEntrenador)) {
+            throw new RuntimeException("El entrenador con ID " + dto.getEntrenador_Id() + " no existe.");
+        }
+
+        // Crear la entidad con el entrenador_id
+        Cliente cliente = new Cliente();
+        cliente.setNombre(dto.getNombre());
+        cliente.setRun(dto.getRun());
+        cliente.setFechaNacimiento(dto.getFechaNacimiento());
+        cliente.setEntrenadorId(dto.getEntrenador_Id());
+
+        return mapToDTO(clienteRepository.save(cliente));
+    }
+
+
 }
