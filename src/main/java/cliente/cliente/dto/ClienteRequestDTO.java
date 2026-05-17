@@ -21,7 +21,7 @@ public class ClienteRequestDTO {
     @NotBlank(message = "El run no puede estar vacio")
     private String run;
 
-    @NotBlank(message = "La fecha no puede esta vacia")
+    @NotNull(message = "La fecha no puede esta vacia")
     private LocalDate fechaNacimiento;
 
     @NotNull(message = "El ID del entrenador es obligatorio")

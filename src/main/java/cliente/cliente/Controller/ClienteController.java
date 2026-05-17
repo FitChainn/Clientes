@@ -2,17 +2,21 @@ package cliente.cliente.Controller;
 
 import cliente.cliente.Modelo.Cliente;
 import cliente.cliente.Service.ClienteService;
+import cliente.cliente.dto.ClienteEntrenador;
 import cliente.cliente.dto.ClienteRequestDTO;
 import cliente.cliente.dto.ClienteResponseDTO;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
 
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -57,6 +61,29 @@ public class ClienteController {
         Map<String, String> mensaje = new HashMap<>();
         mensaje.put("mensaje", "Eliminado correctamente");
         return ResponseEntity.ok(mensaje);
+    }
+
+    @PutMapping("/{clienteId}/entrenador/{entrenadorId}")
+    public ResponseEntity<ClienteResponseDTO> asignarEntrenador(
+            @PathVariable Long clienteId,
+            @PathVariable Long entrenadorId) {
+        return ResponseEntity.ok(clienteService.asignarEntrenador(clienteId, entrenadorId));
+    }
+    @GetMapping("/entrenador/{entrenadorId}")
+    public ResponseEntity<List<ClienteResponseDTO>> obtenerPorEntrenador(@PathVariable Long entrenadorId) {
+        List<ClienteResponseDTO> clientes = clienteService.obtenerClientesPorEntrenador(entrenadorId);
+        if (clientes.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(clientes);
+    }
+    @GetMapping("/entrenador/{entrenadorId}/simple")
+    public ResponseEntity<List<ClienteEntrenador>> obtenerNombresPorEntrenador(@PathVariable Long entrenadorId) {
+        List<ClienteEntrenador> clientes = clienteService.obtenerClientesPorEntrenador(entrenadorId)
+                .stream()
+                .map(c -> new ClienteEntrenador(c.getNombre()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(clientes);
     }
 
 }

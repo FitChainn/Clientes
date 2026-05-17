@@ -29,5 +29,8 @@ public class Cliente {
     @Column(nullable = false)
     private LocalDate fechaNacimiento;
 
+    @Column(name = "entrenador_id")
+    private Long entrenadorId;
+
 
 }
