@@ -26,5 +26,7 @@ public class ClienteRequestDTO {
 
     @NotNull(message = "El ID del entrenador es obligatorio")
     private Long entrenadorId; // <-- FALTABA ESTO
+    @NotNull(message = "El id del establecimiento es obligatorio")
+    private Long establecimientoId;
 
 }

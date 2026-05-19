@@ -32,5 +32,8 @@ public class Cliente {
     @Column(name = "entrenador_id")
     private Long entrenadorId;
 
+    @Column(name = "establecimiento_id")
+    private Long establecimientoId;
+
 
 }

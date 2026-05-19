@@ -19,5 +19,6 @@ public class ClienteResponseDTO {
     private LocalDate fechaNacimiento;
     private Long entrenadorId;
     private Object entrenador;
+    private Long establecimientoId;
 
 }

@@ -85,5 +85,14 @@ public class ClienteController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(clientes);
     }
+    @GetMapping("/establecimiento/{establecimientoId}")
+    public ResponseEntity<List<ClienteResponseDTO>> obtenerPorEstablecimiento(
+            @PathVariable Long establecimientoId) {
+        List<ClienteResponseDTO> clientes = clienteService.obtenerPorEstablecimiento(establecimientoId);
+        if (clientes.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(clientes);
+    }
 
 }
