@@ -1,7 +1,6 @@
 package cliente.cliente.Controller;
 
 import cliente.cliente.Service.ClienteService;
-import cliente.cliente.dto.ClienteEntrenador;
 import cliente.cliente.dto.ClienteRequestDTO;
 import cliente.cliente.dto.ClienteResponseDTO;
 import jakarta.validation.Valid;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -43,12 +41,12 @@ public class ClienteController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<ClienteResponseDTO> RegistrarCliente(@Valid @RequestBody ClienteRequestDTO nuevo) {
+    public ResponseEntity<ClienteResponseDTO> registrarCliente(@Valid @RequestBody ClienteRequestDTO nuevo) {
         return ResponseEntity.status(201).body(clienteService.saveCliente(nuevo));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
         if (clienteService.obtenerCliente(id).isEmpty()) {
             Map<String, String> mensaje1 = new HashMap<>();
@@ -60,5 +58,28 @@ public class ClienteController {
         Map<String, String> mensaje = new HashMap<>();
         mensaje.put("mensaje", "Eliminado correctamente");
         return ResponseEntity.ok(mensaje);
+    }
+
+    // Endpoint interno — usado por Entrenador via WebClient, no aparece en Gateway
+    @PutMapping("/{clienteId}/asignar-entrenador/{entrenadorId}")
+    public ResponseEntity<ClienteResponseDTO> asignarEntrenadorInterno(
+            @PathVariable Long clienteId,
+            @PathVariable Long entrenadorId) {
+        return ResponseEntity.ok(clienteService.asignarEntrenadorInterno(clienteId, entrenadorId));
+    }
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENTRENADOR')")
+    @GetMapping("/entrenador/{entrenadorId}")
+    public ResponseEntity<List<ClienteResponseDTO>> obtenerPorEntrenador(@PathVariable Long entrenadorId) {
+        List<ClienteResponseDTO> clientes = clienteService.obtenerClientesPorEntrenador(entrenadorId);
+        if (clientes.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(clientes);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'ENTRENADOR')")
+    @GetMapping("/establecimiento/{establecimientoId}")
+    public ResponseEntity<List<ClienteResponseDTO>> obtenerPorEstablecimiento(@PathVariable Long establecimientoId) {
+        List<ClienteResponseDTO> clientes = clienteService.obtenerPorEstablecimiento(establecimientoId);
+        if (clientes.isEmpty()) return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(clientes);
     }
 }

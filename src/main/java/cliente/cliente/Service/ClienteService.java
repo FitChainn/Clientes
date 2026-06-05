@@ -21,12 +21,13 @@ import java.util.stream.Collectors;
 @Transactional
 @Slf4j
 public class ClienteService {
+
     @Autowired
     private ClienteRepository clienteRepository;
     @Autowired
     private EntrenadorClient entrenadorClient;
 
-    private ClienteResponseDTO mapToDTO(Cliente cliente){
+    private ClienteResponseDTO mapToDTO(Cliente cliente) {
         return new ClienteResponseDTO(
                 cliente.getId(),
                 cliente.getNombre(),
@@ -45,6 +46,7 @@ public class ClienteService {
         }
         return dto;
     }
+
     public List<ClienteResponseDTO> obtenerClientes() {
         return clienteRepository.findAll()
                 .stream()
@@ -55,7 +57,6 @@ public class ClienteService {
     public Optional<ClienteResponseDTO> obtenerCliente(Long id) {
         return clienteRepository.findById(id).map(this::mapToDTOConEntrenador);
     }
-
 
     public ClienteResponseDTO saveCliente(ClienteRequestDTO dto) {
         log.info("Guardando cliente: {}", dto.getNombre());
@@ -71,19 +72,19 @@ public class ClienteService {
         return mapToDTO(clienteRepository.save(cliente));
     }
 
-    public ClienteResponseDTO asignarEntrenador(Long clienteId, Long entrenadorId) {
-        log.info("Asignando entrenador ID: {} al cliente ID: {}", entrenadorId, clienteId);
-
+    // Método interno — solo lo llama Entrenador via WebClient
+    public ClienteResponseDTO asignarEntrenadorInterno(Long clienteId, Long entrenadorId) {
+        log.info("Asignando entrenador ID: {} al cliente ID: {} (llamada interna)", entrenadorId, clienteId);
         Cliente cliente = clienteRepository.findById(clienteId)
                 .orElseThrow(() -> new NoSuchElementException("Cliente con id " + clienteId + " no encontrado"));
-        entrenadorClient.verificarEntrenadorExiste(entrenadorId);
-
         cliente.setEntrenadorId(entrenadorId);
         return mapToDTO(clienteRepository.save(cliente));
     }
-    public void eliminarPorId (Long id){
+
+    public void eliminarPorId(Long id) {
         log.info("Eliminando cliente con ID: {}", id);
-        clienteRepository.deleteById(id);}
+        clienteRepository.deleteById(id);
+    }
 
     public List<ClienteResponseDTO> obtenerClientesPorEntrenador(Long entrenadorId) {
         return clienteRepository.findByEntrenadorId(entrenadorId)
@@ -91,6 +92,7 @@ public class ClienteService {
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
+
     public List<ClienteResponseDTO> obtenerPorEstablecimiento(Long establecimientoId) {
         return clienteRepository.findByEstablecimientoId(establecimientoId)
                 .stream()
