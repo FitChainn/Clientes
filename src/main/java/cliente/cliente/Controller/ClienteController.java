@@ -1,6 +1,5 @@
 package cliente.cliente.Controller;
 
-import cliente.cliente.Modelo.Cliente;
 import cliente.cliente.Service.ClienteService;
 import cliente.cliente.dto.ClienteEntrenador;
 import cliente.cliente.dto.ClienteRequestDTO;
@@ -61,40 +60,5 @@ public class ClienteController {
         Map<String, String> mensaje = new HashMap<>();
         mensaje.put("mensaje", "Eliminado correctamente");
         return ResponseEntity.ok(mensaje);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{clienteId}/entrenador/{entrenadorId}")
-    public ResponseEntity<ClienteResponseDTO> asignarEntrenador(
-            @PathVariable Long clienteId,
-            @PathVariable Long entrenadorId) {
-        return ResponseEntity.ok(clienteService.asignarEntrenador(clienteId, entrenadorId));
-    }
-
-    @PreAuthorize("hasAnyRole('ADMIN', 'ENTRENADOR')")
-    @GetMapping("/entrenador/{entrenadorId}")
-    public ResponseEntity<List<ClienteResponseDTO>> obtenerPorEntrenador(@PathVariable Long entrenadorId) {
-        List<ClienteResponseDTO> clientes = clienteService.obtenerClientesPorEntrenador(entrenadorId);
-        if (clientes.isEmpty()) return ResponseEntity.noContent().build();
-        return ResponseEntity.ok(clientes);
-    }
-
-    @PreAuthorize("hasAnyRole('ADMIN', 'ENTRENADOR')")
-    @GetMapping("/entrenador/{entrenadorId}/simple")
-    public ResponseEntity<List<ClienteEntrenador>> obtenerNombresPorEntrenador(@PathVariable Long entrenadorId) {
-        List<ClienteEntrenador> clientes = clienteService.obtenerClientesPorEntrenador(entrenadorId)
-                .stream()
-                .map(c -> new ClienteEntrenador(c.getNombre()))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(clientes);
-    }
-
-    @PreAuthorize("hasAnyRole('ADMIN', 'ENTRENADOR')")
-    @GetMapping("/establecimiento/{establecimientoId}")
-    public ResponseEntity<List<ClienteResponseDTO>> obtenerPorEstablecimiento(
-            @PathVariable Long establecimientoId) {
-        List<ClienteResponseDTO> clientes = clienteService.obtenerPorEstablecimiento(establecimientoId);
-        if (clientes.isEmpty()) return ResponseEntity.noContent().build();
-        return ResponseEntity.ok(clientes);
     }
 }

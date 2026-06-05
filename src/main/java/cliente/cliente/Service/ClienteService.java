@@ -2,18 +2,17 @@ package cliente.cliente.Service;
 
 import cliente.cliente.Modelo.Cliente;
 import cliente.cliente.Repository.ClienteRepository;
+import cliente.cliente.WebClient.EntrenadorClient;
 import cliente.cliente.dto.ClienteRequestDTO;
 import cliente.cliente.dto.ClienteResponseDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,7 @@ public class ClienteService {
     @Autowired
     private ClienteRepository clienteRepository;
     @Autowired
-    private WebClient.Builder webClientBuilder;
+    private EntrenadorClient entrenadorClient;
 
     private ClienteResponseDTO mapToDTO(Cliente cliente){
         return new ClienteResponseDTO(
@@ -42,17 +41,7 @@ public class ClienteService {
     private ClienteResponseDTO mapToDTOConEntrenador(Cliente cliente) {
         ClienteResponseDTO dto = mapToDTO(cliente);
         if (cliente.getEntrenadorId() != null) {
-            try {
-                Object entrenador = webClientBuilder.build()
-                        .get()
-                        .uri("http://localhost:8082/api/entrenadores/{id}/simple", cliente.getEntrenadorId())
-                        .retrieve()
-                        .bodyToMono(Object.class)
-                        .block();
-                dto.setEntrenador(entrenador);
-            } catch (Exception e) {
-                dto.setEntrenador(null);
-            }
+            dto.setEntrenador(entrenadorClient.obtenerEntrenadorSimple(cliente.getEntrenadorId()));
         }
         return dto;
     }
@@ -70,20 +59,13 @@ public class ClienteService {
 
     public ClienteResponseDTO saveCliente(ClienteRequestDTO dto) {
         log.info("Guardando cliente: {}", dto.getNombre());
-        // Petición HTTP GET al microservicio de Entrenadores
-        webClientBuilder.build()
-                .get()
-                .uri("http://localhost:8082/api/entrenadores/{id}", dto.getEntrenadorId())
-                .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response ->
-                        Mono.error(new RuntimeException("El entrenador con ID " + dto.getEntrenadorId() + " no existe.")))
-                .toBodilessEntity()
-                .block(); // .block() congela la ejecución hasta recibir la respuesta (Síncrono)
+        entrenadorClient.verificarEntrenadorExiste(dto.getEntrenadorId());
+
         Cliente cliente = new Cliente();
         cliente.setNombre(dto.getNombre());
         cliente.setRun(dto.getRun());
         cliente.setFechaNacimiento(dto.getFechaNacimiento());
-        cliente.setEntrenadorId(dto.getEntrenadorId()); // Guardamos la referencia del ID
+        cliente.setEntrenadorId(dto.getEntrenadorId());
         cliente.setEstablecimientoId(dto.getEstablecimientoId());
         log.info("Cliente guardado con ID: {}", cliente.getId());
         return mapToDTO(clienteRepository.save(cliente));
@@ -91,17 +73,10 @@ public class ClienteService {
 
     public ClienteResponseDTO asignarEntrenador(Long clienteId, Long entrenadorId) {
         log.info("Asignando entrenador ID: {} al cliente ID: {}", entrenadorId, clienteId);
-        Cliente cliente = clienteRepository.findById(clienteId)
-                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
-        webClientBuilder.build()
-                .get()
-                .uri("http://localhost:8082/api/entrenadores/{id}", entrenadorId)
-                .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response ->
-                        Mono.error(new RuntimeException("El entrenador con ID " + entrenadorId + " no existe.")))
-                .toBodilessEntity()
-                .block();
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new NoSuchElementException("Cliente con id " + clienteId + " no encontrado"));
+        entrenadorClient.verificarEntrenadorExiste(entrenadorId);
 
         cliente.setEntrenadorId(entrenadorId);
         return mapToDTO(clienteRepository.save(cliente));
