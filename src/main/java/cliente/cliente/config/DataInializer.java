@@ -38,5 +38,7 @@ public class DataInializer implements CommandLineRunner {
         clienteRepository.save(new Cliente(null, "Patricia López", "17888999-k", LocalDate.of(1998,9,22),null,null));
         clienteRepository.save(new Cliente(null, "Fernando Tapia", "13333444-1", LocalDate.of(1982,10,10),null,null));
         clienteRepository.save(new Cliente(null, "Sofía Castro", "16777888-5", LocalDate.of(1996,4,5),null,null));
+
+        log.info(">>> DataInitializer: {} Clientes insertados correctamente.", clienteRepository.count());
     }
 }
