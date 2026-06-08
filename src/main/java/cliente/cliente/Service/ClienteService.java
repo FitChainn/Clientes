@@ -22,10 +22,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ClienteService {
 
-    @Autowired
-    private ClienteRepository clienteRepository;
-    @Autowired
-    private EntrenadorClient entrenadorClient;
+    private final ClienteRepository clienteRepository;
+
+    private final EntrenadorClient entrenadorClient;
 
     private ClienteResponseDTO mapToDTO(Cliente cliente) {
         return new ClienteResponseDTO(
