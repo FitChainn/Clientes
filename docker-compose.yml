@@ -1,0 +1,11 @@
+services:
+  clientes:
+    build: .
+    container_name: clientes_service
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/db_fitchain
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root

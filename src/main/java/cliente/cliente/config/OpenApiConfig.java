@@ -18,6 +18,7 @@ public class OpenApiConfig {
                         .title("Clientes API - FitChain")
                         .description("API DE GESTIÓN DE LOS CLIENTES")
                         .version("1.0.0")).servers(List.of(
+                                new Server().url("http://44.197.145.9:8081").description("AWS"),
                         new Server().url("http://localhost:8081").description("Local")
                 ));
     }
