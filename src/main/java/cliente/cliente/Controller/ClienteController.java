@@ -55,6 +55,21 @@ public class ClienteController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    //falta el actualizar
+    @Operation(summary = "ACTUALIZAR CLIENTE", description = "Actualiza un cliente por su ID. Acceso: ADMIN")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "CLIENTE ACTUALIZADO EXITOSAMENTE"),
+            @ApiResponse(responseCode = "400", description = "DATOS INVÁLIDOS"),
+            @ApiResponse(responseCode = "404", description = "CLIENTE NO ENCONTRADO")
+    })
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<ClienteResponseDTO> actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody ClienteRequestDTO dto) {
+        return ResponseEntity.ok(clienteService.actualizar(id, dto));
+    }
+
     @Operation(summary = "REGISTRAR CLIENTE", description = "Crea un nuevo cliente. Acceso: ADMIN")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "CLIENTE REGISTRADO EXITOSAMENTE"),

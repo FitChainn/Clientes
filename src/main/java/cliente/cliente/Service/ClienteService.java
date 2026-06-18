@@ -71,6 +71,23 @@ public class ClienteService {
         return mapToDTO(clienteRepository.save(cliente));
     }
 
+    public ClienteResponseDTO actualizar(Long id, ClienteRequestDTO dto) {
+        log.info("Actualizando cliente con ID: {}", id);
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Cliente con id " + id + " no encontrado"));
+
+        entrenadorClient.verificarEntrenadorExiste(dto.getEntrenadorId());
+
+        cliente.setNombre(dto.getNombre());
+        cliente.setRun(dto.getRun());
+        cliente.setFechaNacimiento(dto.getFechaNacimiento());
+        cliente.setEntrenadorId(dto.getEntrenadorId());
+        cliente.setEstablecimientoId(dto.getEstablecimientoId());
+
+        log.info("Cliente {} actualizado correctamente", id);
+        return mapToDTO(clienteRepository.save(cliente));
+    }
+
     // Método interno — solo lo llama Entrenador via WebClient
     public ClienteResponseDTO asignarEntrenadorInterno(Long clienteId, Long entrenadorId) {
         log.info("Asignando entrenador ID: {} al cliente ID: {} (llamada interna)", entrenadorId, clienteId);
