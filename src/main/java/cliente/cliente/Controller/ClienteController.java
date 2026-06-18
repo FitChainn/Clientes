@@ -25,7 +25,7 @@ import java.util.NoSuchElementException;
 @Tag(name = "CLIENTES", description = "GESTIÓN DE CLIENTES")
 @Slf4j
 @RestController
-@RequestMapping("v1/clientes")
+@RequestMapping("/v1/clientes")
 public class ClienteController {
 
     @Autowired
@@ -43,6 +43,7 @@ public class ClienteController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ENTRENADOR')")
     @GetMapping
     public ResponseEntity<List<ClienteResponseDTO>> obtenerClientes() {
+        log.info("GET /v1/clientes - LISTAR TODOS");
         List<ClienteResponseDTO> clientes = clienteService.obtenerClientes();
         if (clientes.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(clientes);
@@ -56,6 +57,7 @@ public class ClienteController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ENTRENADOR', 'CLIENTE')")
     @GetMapping("/{id}")
     public ResponseEntity<EntityModel<ClienteResponseDTO>> obtenerCliente(@PathVariable Long id) {
+        log.info("GET /v1/clientes/{} - BUSCAR POR ID", id);
         ClienteResponseDTO cliente = clienteService.obtenerCliente(id)
                 .orElseThrow(() -> new NoSuchElementException("CLIENTE CON EL ID " + id + " NO ENCONTRADO"));
         return ResponseEntity.ok(assembler.toModel(cliente));
@@ -70,6 +72,7 @@ public class ClienteController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ClienteResponseDTO> registrarCliente(@Valid @RequestBody ClienteRequestDTO nuevo) {
+        log.info("POST /v1/clientes - REGISTRAR CLIENTE nombre={}", nuevo.getNombre());
         return ResponseEntity.status(201).body(clienteService.saveCliente(nuevo));
     }
 
@@ -81,6 +84,7 @@ public class ClienteController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
+        log.info("DELETE /v1/clientes/{} - ELIMINAR CLIENTE", id);
         if (clienteService.obtenerCliente(id).isEmpty()) {
             Map<String, String> mensaje1 = new HashMap<>();
             mensaje1.put("mensaje", "Cliente no encontrado");
@@ -103,6 +107,7 @@ public class ClienteController {
     public ResponseEntity<ClienteResponseDTO> asignarEntrenadorInterno(
             @PathVariable Long clienteId,
             @PathVariable Long entrenadorId) {
+        log.info("PUT /v1/clientes/{}/asignar-entrenador/{} - ASIGNAR ENTRENADOR (INTERNO)", clienteId, entrenadorId);
         return ResponseEntity.ok(clienteService.asignarEntrenadorInterno(clienteId, entrenadorId));
     }
 
@@ -114,6 +119,7 @@ public class ClienteController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ENTRENADOR')")
     @GetMapping("/entrenador/{entrenadorId}")
     public ResponseEntity<List<ClienteResponseDTO>> obtenerPorEntrenador(@PathVariable Long entrenadorId) {
+        log.info("GET /v1/clientes/entrenador/{} - BUSCAR POR ENTRENADOR", entrenadorId);
         List<ClienteResponseDTO> clientes = clienteService.obtenerClientesPorEntrenador(entrenadorId);
         if (clientes.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(clientes);
@@ -127,6 +133,7 @@ public class ClienteController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ENTRENADOR')")
     @GetMapping("/establecimiento/{establecimientoId}")
     public ResponseEntity<List<ClienteResponseDTO>> obtenerPorEstablecimiento(@PathVariable Long establecimientoId) {
+        log.info("GET /v1/clientes/establecimiento/{} - BUSCAR POR ESTABLECIMIENTO", establecimientoId);
         List<ClienteResponseDTO> clientes = clienteService.obtenerPorEstablecimiento(establecimientoId);
         if (clientes.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(clientes);
