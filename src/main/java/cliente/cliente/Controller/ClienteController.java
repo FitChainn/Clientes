@@ -1,6 +1,7 @@
 package cliente.cliente.Controller;
 
 import cliente.cliente.Service.ClienteService;
+import cliente.cliente.assembler.ClienteModelAssembler;
 import cliente.cliente.dto.ClienteRequestDTO;
 import cliente.cliente.dto.ClienteResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,12 +20,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Tag(name = "CLIENTES", description = "GESTIÓN DE CLIENTES")
 @Slf4j
 @RestController
 @RequestMapping("v1/clientes")
 public class ClienteController {
+
+    @Autowired
+    private ClienteModelAssembler assembler;
 
     @Autowired
     private ClienteService clienteService;
@@ -49,10 +55,10 @@ public class ClienteController {
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'ENTRENADOR', 'CLIENTE')")
     @GetMapping("/{id}")
-    public ResponseEntity<ClienteResponseDTO> obtenerCliente(@PathVariable Long id) {
-        return clienteService.obtenerCliente(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<EntityModel<ClienteResponseDTO>> obtenerCliente(@PathVariable Long id) {
+        ClienteResponseDTO cliente = clienteService.obtenerCliente(id)
+                .orElseThrow(() -> new NoSuchElementException("CLIENTE CON EL ID " + id + " NO ENCONTRADO"));
+        return ResponseEntity.ok(assembler.toModel(cliente));
     }
 
     @Operation(summary = "REGISTRAR CLIENTE", description = "Crea un nuevo cliente. Acceso: ADMIN")

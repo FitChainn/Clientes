@@ -2,10 +2,10 @@ package cliente.cliente;
 
 import cliente.cliente.Modelo.Cliente;
 import cliente.cliente.Repository.ClienteRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @DisplayName("PRUEBAS UNITARIAS DEL REPOSITORY DE CLIENTE")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class ClienteRepositoryTest {
 
     @Autowired
@@ -25,6 +24,12 @@ public class ClienteRepositoryTest {
 
     @Autowired
     private TestEntityManager em;
+
+    @BeforeEach
+    void limpiarBDenMemoria() {
+        repo.deleteAll();
+        em.flush();
+    }
 
     private Cliente crearCliente(String nombre, String run, Long entrenadorId, Long establecimientoId) {
         Cliente c = new Cliente();

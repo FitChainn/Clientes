@@ -2,6 +2,7 @@ package cliente.cliente;
 
 import cliente.cliente.Controller.ClienteController;
 import cliente.cliente.Service.ClienteService;
+import cliente.cliente.assembler.ClienteModelAssembler;
 import cliente.cliente.config.SecurityConfig;
 import cliente.cliente.dto.ClienteRequestDTO;
 import cliente.cliente.dto.ClienteResponseDTO;
@@ -15,6 +16,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import org.springframework.hateoas.EntityModel;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,6 +39,9 @@ public class ClienteControllerTest {
     @MockBean
     private ClienteService clienteService;
 
+    @MockBean
+    private ClienteModelAssembler assembler;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -46,6 +52,7 @@ public class ClienteControllerTest {
     void setUp() {
         cResponse = new ClienteResponseDTO(1L, "JUANITO PEREZ", "12.123.431-2", LocalDate.of(1995, 5, 10), 2L, null, 3L);
         cRequest = new ClienteRequestDTO("JUANITO PEREZ", "12.123.431-2", LocalDate.of(1995, 5, 10), 2L, 3L);
+        when(assembler.toModel(any(ClienteResponseDTO.class))).thenAnswer(inv -> EntityModel.of(inv.getArgument(0)));
     }
 
 
@@ -114,7 +121,8 @@ public class ClienteControllerTest {
 
         mockMvc.perform(get("/v1/clientes/99")
                         .header("X-User-Rol", "ADMIN"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensaje").value("CLIENTE CON EL ID 99 NO ENCONTRADO"));
     }
 
 
