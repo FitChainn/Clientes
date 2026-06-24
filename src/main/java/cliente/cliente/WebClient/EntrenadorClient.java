@@ -23,7 +23,7 @@ public class EntrenadorClient {
         try {
             webClientBuilder.build()
                     .get()
-                    .uri(entrenadorServiceUrl + "/api/entrenadores/" + entrenadorId)
+                    .uri(entrenadorServiceUrl + "/v1/entrenadores/" + entrenadorId)
                     .retrieve()
                     .toBodilessEntity()
                     .block();
@@ -41,7 +41,7 @@ public class EntrenadorClient {
         try {
             return webClientBuilder.build()
                     .get()
-                    .uri(entrenadorServiceUrl + "/api/entrenadores/" + entrenadorId + "/simple")
+                    .uri(entrenadorServiceUrl + "/v1/entrenadores/" + entrenadorId + "/simple")
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();

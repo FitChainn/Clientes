@@ -11,16 +11,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Tag(name = "CLIENTES", description = "GESTIÓN DE CLIENTES")
 @Slf4j
@@ -37,16 +38,16 @@ public class ClienteController {
     @Operation(summary = "OBTENER TODOS LOS CLIENTES", description = "Retorna la lista de todos los clientes. Acceso: ADMIN, ENTRENADOR")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "LISTA OBTENIDA CON ÉXITO"),
-            @ApiResponse(responseCode = "204", description = "NO HAY CLIENTES REGISTRADOS"),
             @ApiResponse(responseCode = "403", description = "SIN PERMISOS SUFICIENTES")
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'ENTRENADOR')")
     @GetMapping
-    public ResponseEntity<List<ClienteResponseDTO>> obtenerClientes() {
+    public ResponseEntity<CollectionModel<EntityModel<ClienteResponseDTO>>> obtenerClientes() {
         log.info("GET /v1/clientes - LISTAR TODOS");
-        List<ClienteResponseDTO> clientes = clienteService.obtenerClientes();
-        if (clientes.isEmpty()) return ResponseEntity.noContent().build();
-        return ResponseEntity.ok(clientes);
+        List<EntityModel<ClienteResponseDTO>> clientes = clienteService.obtenerClientes().stream()
+                .map(assembler::toModel).toList();
+        return ResponseEntity.ok(CollectionModel.of(clientes,
+                linkTo(methodOn(ClienteController.class).obtenerClientes()).withSelfRel()));
     }
 
     @Operation(summary = "OBTENER CLIENTE POR ID", description = "Retorna un cliente específico por su ID. Acceso: ADMIN, ENTRENADOR, CLIENTE")
@@ -71,44 +72,37 @@ public class ClienteController {
     })
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<ClienteResponseDTO> registrarCliente(@Valid @RequestBody ClienteRequestDTO nuevo) {
+    public ResponseEntity<EntityModel<ClienteResponseDTO>> registrarCliente(@Valid @RequestBody ClienteRequestDTO nuevo) {
         log.info("POST /v1/clientes - REGISTRAR CLIENTE nombre={}", nuevo.getNombre());
-        return ResponseEntity.status(201).body(clienteService.saveCliente(nuevo));
+        return ResponseEntity.status(201).body(assembler.toModel(clienteService.saveCliente(nuevo)));
     }
 
     @Operation(summary = "ELIMINAR CLIENTE", description = "Elimina un cliente por su ID. Acceso: ADMIN")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "CLIENTE ELIMINADO CORRECTAMENTE"),
+            @ApiResponse(responseCode = "204", description = "CLIENTE ELIMINADO CORRECTAMENTE"),
             @ApiResponse(responseCode = "404", description = "CLIENTE NO ENCONTRADO")
     })
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<ClienteResponseDTO>> eliminar(@PathVariable Long id) {
         log.info("DELETE /v1/clientes/{} - ELIMINAR CLIENTE", id);
-        if (clienteService.obtenerCliente(id).isEmpty()) {
-            Map<String, String> mensaje1 = new HashMap<>();
-            mensaje1.put("mensaje", "Cliente no encontrado");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mensaje1);
-        }
+        ClienteResponseDTO cliente = clienteService.obtenerCliente(id)
+                .orElseThrow(() -> new NoSuchElementException("CLIENTE CON EL ID " + id + " NO ENCONTRADO"));
         clienteService.eliminarPorId(id);
-        log.info("Cliente eliminado");
-        Map<String, String> mensaje = new HashMap<>();
-        mensaje.put("mensaje", "Eliminado correctamente");
-        return ResponseEntity.ok(mensaje);
+        return ResponseEntity.ok(assembler.toModel(cliente));
     }
 
-    // Endpoint interno — usado por Entrenador via WebClient, no aparece en Gateway
     @Operation(summary = "ASIGNAR ENTRENADOR (INTERNO)", description = "Asigna un entrenador a un cliente. Endpoint interno usado por WebClient, no pasa por Gateway.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "ENTRENADOR ASIGNADO EXITOSAMENTE"),
             @ApiResponse(responseCode = "404", description = "CLIENTE O ENTRENADOR NO ENCONTRADO")
     })
     @PutMapping("/{clienteId}/asignar-entrenador/{entrenadorId}")
-    public ResponseEntity<ClienteResponseDTO> asignarEntrenadorInterno(
+    public ResponseEntity<EntityModel<ClienteResponseDTO>> asignarEntrenadorInterno(
             @PathVariable Long clienteId,
             @PathVariable Long entrenadorId) {
         log.info("PUT /v1/clientes/{}/asignar-entrenador/{} - ASIGNAR ENTRENADOR (INTERNO)", clienteId, entrenadorId);
-        return ResponseEntity.ok(clienteService.asignarEntrenadorInterno(clienteId, entrenadorId));
+        return ResponseEntity.ok(assembler.toModel(clienteService.asignarEntrenadorInterno(clienteId, entrenadorId)));
     }
 
     @Operation(summary = "OBTENER CLIENTES POR ENTRENADOR", description = "Retorna todos los clientes asignados a un entrenador. Acceso: ADMIN, ENTRENADOR")
@@ -118,11 +112,12 @@ public class ClienteController {
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'ENTRENADOR')")
     @GetMapping("/entrenador/{entrenadorId}")
-    public ResponseEntity<List<ClienteResponseDTO>> obtenerPorEntrenador(@PathVariable Long entrenadorId) {
+    public ResponseEntity<CollectionModel<EntityModel<ClienteResponseDTO>>> obtenerPorEntrenador(@PathVariable Long entrenadorId) {
         log.info("GET /v1/clientes/entrenador/{} - BUSCAR POR ENTRENADOR", entrenadorId);
-        List<ClienteResponseDTO> clientes = clienteService.obtenerClientesPorEntrenador(entrenadorId);
-        if (clientes.isEmpty()) return ResponseEntity.noContent().build();
-        return ResponseEntity.ok(clientes);
+        List<EntityModel<ClienteResponseDTO>> clientes = clienteService.obtenerClientesPorEntrenador(entrenadorId)
+                .stream().map(assembler::toModel).toList();
+        return ResponseEntity.ok(CollectionModel.of(clientes,
+                linkTo(methodOn(ClienteController.class).obtenerPorEntrenador(entrenadorId)).withSelfRel()));
     }
 
     @Operation(summary = "OBTENER CLIENTES POR ESTABLECIMIENTO", description = "Retorna todos los clientes de un establecimiento. Acceso: ADMIN, ENTRENADOR")
@@ -132,10 +127,11 @@ public class ClienteController {
     })
     @PreAuthorize("hasAnyRole('ADMIN', 'ENTRENADOR')")
     @GetMapping("/establecimiento/{establecimientoId}")
-    public ResponseEntity<List<ClienteResponseDTO>> obtenerPorEstablecimiento(@PathVariable Long establecimientoId) {
+    public ResponseEntity<CollectionModel<EntityModel<ClienteResponseDTO>>> obtenerPorEstablecimiento(@PathVariable Long establecimientoId) {
         log.info("GET /v1/clientes/establecimiento/{} - BUSCAR POR ESTABLECIMIENTO", establecimientoId);
-        List<ClienteResponseDTO> clientes = clienteService.obtenerPorEstablecimiento(establecimientoId);
-        if (clientes.isEmpty()) return ResponseEntity.noContent().build();
-        return ResponseEntity.ok(clientes);
+        List<EntityModel<ClienteResponseDTO>> clientes = clienteService.obtenerPorEstablecimiento(establecimientoId)
+                .stream().map(assembler::toModel).toList();
+        return ResponseEntity.ok(CollectionModel.of(clientes,
+                linkTo(methodOn(ClienteController.class).obtenerPorEstablecimiento(establecimientoId)).withSelfRel()));
     }
 }
